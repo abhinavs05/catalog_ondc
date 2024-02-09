@@ -1,0 +1,10 @@
+const appicon = 'assets/images/logo cataloge.jpg';
+const bgimage = 'assets/images/bgimage.jpg';
+const homeicon = 'assets/images/home-icon-vector.jpg';
+const profileicon = 'assets/images/R (2).png';
+const metaGuide = 'assets/images/virtual_reality_logo_4x.jpg';
+const connect = 'assets/images/connect.jpg';
+const chatboticon = 'assets/images/3d cat.jpeg';
+const ar = 'assets/images/create cat.jpg';
+const aiavtar = 'assets/images/avatar guide.jpg';
+const fitness = 'assets/images/view your catalogue.jpg';

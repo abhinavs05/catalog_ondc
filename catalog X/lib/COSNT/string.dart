@@ -1,0 +1,21 @@
+import 'dart:developer';
+
+const appName = "CatalogX";
+const credits = "@catalog Wizard";
+const appVersion = "CatalogX 1.0.0";
+const username = "userName";
+const namehint = "UserNameHINT";
+const Password = "Password";
+const PasswordHint = "PasswordHint";
+const Login = "GET STARTED";
+const home = "Home";
+const Profile = "Profile";
+const usern32ame = "username";
+const score = "200";
+const achievements = "12";
+const metaverse = "Education Space";
+const Chatbot = "View Your 3D catalog";
+const ARService = "Create Your Catalog";
+const Fdsaitness = "View your 2D catalog";
+const Service = "Service";
+const ConnectDapp = "Connect For HELP!";
