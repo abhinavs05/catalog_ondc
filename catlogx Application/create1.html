@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Your Catalogue</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Your CSS styles here */
+    .previewContainer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      overflow-x: auto;
+    }
+
+    .previewContainer img,
+    .previewContainer canvas {
+      max-width: 200px;
+      margin: 0 5px;
+    }
+
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      display: none; /* Hide by default */
+    }
+
+    .splash-screen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      color: white;
+      font-size: 24px;
+      text-align: center;
+      padding-top: 50vh;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Create Your Catalogue</h1>
+    <form id="Catalogue">
+      <label for="orgName">Organization Name:</label>
+      <input type="text" id="orgName" name="orgName" required>
+
+      <label for="phone">Phone Number:</label>
+      <input type="tel" id="phone" name="phone" required>
+
+      <label for="address">Address:</label>
+      <textarea id="address" name="address" required></textarea>
+
+      <label for="businessDescription">Business Description:</label>
+      <textarea id="businessDescription" name="businessDescription" required></textarea>
+
+      <label for="website">Website:</label>
+      <input type="url" id="website" name="website" required>
+
+      <label for="category">Categories:</label>
+      <select name="category" id="category">
+        <option value="select">SELECT</option>
+        <option value="furniture">FURNITURE</option>
+        <option value="eatables">EATABLES</option>
+        <option value="ecom">E-COMMERCE</option>
+      </select>
+      
+      <label for="files">Upload Files:</label>
+      <div class="fileInputs">
+        <input type="file" name="files[]" multiple accept="image/*,.obj,.stl,.gltf,.gif">
+        
+        <div class="filePreview"></div>
+      </div>
+      <div class="fileInputs">
+        <input type="file" name="files[]" multiple accept="image/*,.obj,.stl,.gltf,.gif">
+        
+        <div class="filePreview"></div>
+      </div>
+      <div class="fileInputs">
+        <input type="file" name="files[]" multiple accept="image/*,.obj,.stl,.gltf,.gif">
+        
+        <div class="filePreview"></div>
+      </div>
+
+      <button  onclick="location.href = 'ondc/index.html';" class="btn">submit
+      </button>
+    </form>
+    <div class="loading-spinner" id="loadingSpinner"></div> <!-- Loading Spinner -->
+    <div class="splash-screen" id="splashScreen">Catalogue submitted successfully! Redirecting...</div> <!-- Splash screen -->
+
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/OBJLoader.js"></script> <!-- Include OBJLoader -->
+  <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script> <!-- Include GLTFLoader -->
+  <script src="https://cdn.jsdelivr.net/npm/three/examples/js/controls/OrbitControls.js"></script> <!-- Include OrbitControls -->
+
+  <script>
+  // Get the splash screen element
+  const splashScreen = document.getElementById('splashScreen');
+
+  // Add a submit event listener to the form
+  document.getElementById('Catalogue').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    // Show the splash screen
+    showSplashScreen();
+
+    // Redirect to the ondc/index.html page after 3 seconds
+    setTimeout(function() {
+      redirectToPage('ondc/index.html');
+    }, 3000);
+  });
+
+  // Function to show the splash screen
+  function showSplashScreen() {
+    splashScreen.style.display = 'block'; // Show the splash screen
+  }
+
+  // Function to redirect to a new page
+  function redirectToPage(pageUrl) {
+    location.href = pageUrl; // Redirect to the new page
+  }
+
+    document.querySelectorAll('input[type="file"]').forEach(function(input) {
+      input.addEventListener('change', function() {
+        var files = this.files;
+        var filePreview = this.nextElementSibling.nextElementSibling;
+        filePreview.innerHTML = '';
+
+        for (var i = 0; i < files.length; i++) {
+          var file = files[i];
+          var reader = new FileReader();
+
+          if (file.type.startsWith('image/') || file.name.toLowerCase().endsWith('.gif')) {
+            reader.onload = function(e) {
+              var img = document.createElement('img');
+              img.src = e.target.result;
+              filePreview.appendChild(img);
+            };
+          } else if (file.name.toLowerCase().endsWith('.obj') || file.name.toLowerCase().endsWith('.stl') || file.name.toLowerCase().endsWith('.gltf')) {
+            reader.onload = function(e) {
+              var modelName = file.name;
+              var container = document.createElement('div');
+              container.classList.add('previewContainer');
+              var canvas = document.createElement('canvas');
+              container.appendChild(canvas);
+              filePreview.appendChild(container);
+
+              // Show loading spinner
+              var loadingSpinner = document.getElementById('loadingSpinner');
+              loadingSpinner.style.display = 'block';
+
+              // Load 3D model using Three.js OBJLoader or GLTFLoader
+              var scene = new THREE.Scene();
+              var camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+              var renderer = new THREE.WebGLRenderer({ canvas: canvas });
+              renderer.setSize(200, 200);
+
+              if (file.name.toLowerCase().endsWith('.obj') || file.name.toLowerCase().endsWith('.stl')) {
+                var loader = new THREE.OBJLoader(); // Use OBJLoader for OBJ and STL files
+                loader.load(e.target.result, function(obj) {
+                  scene.add(obj);
+                  // Hide loading spinner after loading
+                  loadingSpinner.style.display = 'none';
+                }, undefined, function(error) {
+                  console.error('Error loading OBJ file:', error);
+                  // Hide loading spinner if loading fails
+                  loadingSpinner.style.display = 'none';
+                });
+              } else if (file.name.toLowerCase().endsWith('.gltf')) {
+                var loader = new THREE.GLTFLoader(); // Use GLTFLoader for GLTF files
+                loader.load(e.target.result, function(gltf) {
+                  var model = gltf.scene;
+                  scene.add(model);
+
+                  // Add OrbitControls for rotating the model
+                  var controls = new THREE.OrbitControls(camera, renderer.domElement);
+                  controls.enableDamping = true;
+                  controls.dampingFactor = 0.25;
+                  controls.rotateSpeed = 0.35;
+                  controls.enableZoom = true;
+
+                  // Hide loading spinner after loading
+                  loadingSpinner.style.display = 'none';
+                }, undefined, function(error) {
+                  console.error('Error loading GLTF file:', error);
+                  // Hide loading spinner if loading fails
+                  loadingSpinner.style.display = 'none';
+                });
+              }
+            };
+          }
+
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+  </script>
+  <script type="text/javascript">
+    (function(d, t) {
+        var v = d.createElement(t), s = d.getElementsByTagName(t)[0];
+        v.onload = function() {
+          window.voiceflow.chat.load({
+            verify: { projectID: '65c5fa2ff22b61152c9339b6' },
+            url: 'https://general-runtime.voiceflow.com',
+            versionID: 'production'
+          });
+        }
+        v.src = "https://cdn.voiceflow.com/widget/bundle.mjs"; v.type = "text/javascript"; s.parentNode.insertBefore(v, s);
+    })(document, 'script');
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
